@@ -111,7 +111,8 @@ $ docker stack deploy -c hello-svc-compose.yaml hello
 Creating network hello_app_ovl
 Creating service hello_app
 ```
-The stack create an application with two running containers
+
+The stack creates an application with two running containers
 
 ```
  docker service  ps hello_app
@@ -131,7 +132,8 @@ Hostname: 2f2f03ddddce
 
 35.246.203.59 refers to Public IP address of one Interlock Node
 
-When using a loadbalancer, create an A record to resolve *.swarmapps.dev01.dockernetes.org -> <strong><em>IngressLoadBalancerIP</em></strong>
+When using a loadbalancer, create an A record to resolve *.swarmapps.dev01.dockernetes.org -> ```IngressLoadBalancerIP```
+
 ![DNS Mapping  ](./ARecord.png)
 
 
