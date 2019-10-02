@@ -1,0 +1,24 @@
+version: "3.7"
+
+services:
+  app :
+    image: gcr.io/google-samples/hello-app:1.0
+    deploy:
+      replicas: 2
+      labels:
+        com.docker.lb.hosts: hello.swarmapps.dev01.dockernetes.org
+        com.docker.lb.network: app_ovl
+        com.docker.lb.port: 8080
+        com.docker.lb.ssl_cert: wildcardcert
+        com.docker.lb.ssl_key: wildcardkey
+    networks:
+      - app_ovl
+
+networks:
+  app_ovl:
+
+secrets:
+  wildcardcert:
+    external: true
+  wildcardkey:
+    external: true
