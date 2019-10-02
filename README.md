@@ -48,7 +48,7 @@ You can inspect the created configuration with the following command
 $ docker config  inspect  interlock.conf --pretty
 ```
 
-## Create the interlock Overlay network 
+## Create the interlock Overlay network
 ```
 $ docker network create -d overlay interlock
 ```
@@ -133,7 +133,7 @@ Hostname: 2f2f03ddddce
 
 35.246.203.59 refers to Public IP address of one Interlock Node
 
-When using a loadbalancer, create an A record to resolve *.swarmapps.dev01.dockernetes.org -> ```IngressLoadBalancerIP```
+When using a loadbalancer, create an A record to resolve ``` *.swarmapps.dev01.dockernetes.org --> IngressLoadBalancerIP```
 
 ![DNS Mapping  ](./ARecord.png)
 
