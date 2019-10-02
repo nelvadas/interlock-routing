@@ -1,39 +1,59 @@
 # interlock-routing
 L7 Routing with Docker EE and Interlock for  Swarm Based Applications
 
-## Label Interlock proxy nodes 
+## Label Interlock proxy nodes
+
+Add a specific label to all Interlock nodes
 
 ```
 docker node update --label-add role=interlock-infra  interlock-node-0
+docker node update --label-add role=interlock-infra  interlock-node-1
+
 ```
 
-Apply the same role label for kubectl management 
+Apply the same role label for kubectl Commands  
 ```
 kubectl label node  interlock-node-0 role=interlock-infra
+kubectl label node  interlock-node-1 role=interlock-infra
+
 ```
 
 
-## Interlock Service configuration
+## Review Interlock Config
+Interlock configuration is defined in [service.interlock.conf](./service.interlock.conf)
+In this file, pay attention to the following attributes
 
-### Proxy Constraints
+1. Proxy Constraints
+Proxy Constrains define the requirement that should be valid for a node to host a proxy instance
+We should include all node with <strong><em>role=interlock-infra</em></strong>
 
 ```
     ProxyConstraints = ["node.labels.role==interlock-infra","node.labels.com.docker.ucp.orchestrator.swarm==true"]
 ```
 
-### Listen Ports
-### Mode ingress/host
+2. Listen Ports
+We want interlock to listen on HostPort 443 and 80
 
-## Setup 
+3. Mode ingress/host
+Host mode is the recommended approach for high performance production application
 
-### Create the interlock configuration 
+
+
+### Create the interlock configuration
 ```
-docker config create interlock.conf service.interlock.conf
+$docker config create interlock.conf ./service.interlock.conf
+```
+
+You can inspect the created configuration with the following command
+```
 $ docker config  inspect  interlock.conf --pretty
+```
+
 $ docker network create -d overlay interlock
 ```
 
-### Create the interlock service 
+## Create the Interlock Service
+The interlock service create both interlock-extension and interlock-proxy services while starting
 ```
 $ docker service create \
      --name interlock \
@@ -48,10 +68,15 @@ overall progress: 1 out of 1 tasks
 verify: Service converged
 ```
 
-##Check service list
-You should have at least these three services 
-interlock, interloc-proxy and interlock-extension
+Check The service list
+You should have at least these three services
+1. interlock
+2. interloc-proxy
+3. interlock-extension
+
+
 ![Service List ](./ServiceList.png)
+
 ```
 [enono@ucp-node-0 ~]$ docker service ps brave_roentgen
 ID                  NAME                   IMAGE                              NODE                DESIRED STATE       CURRENT STATE            ERROR               PORTS
@@ -59,13 +84,19 @@ t6j11xoyxvxc        brave_roentgen.1       docker/ucp-interlock-proxy:3.2.1   in
 l9wxkxhpchxj         \_ brave_roentgen.1   docker/ucp-interlock-proxy:3.2.1   interlock-node-0    Shutdown            Shutdown 5 minutes ago
 ```
 
-## Create a wildcard cert
-to serve all the applications *.swarmapps.dev01.dockernetes.org, we created a wildcard cert like this
+## Create a wildcard certificate
+to serve all the applications <em>*.swarmapps.dev01.dockernetes.org</em>,  create a wildcard self signed cert like this
 
 ```
-openssl req -new -newkey rsa:4096   -days 3650   -nodes   -x509  -subj "/O=Dockernetes/CN=hello.swarmapps.dev01.dockernetes.org" -keyout wildcard.key -out wildcard.cert
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+-keyout wildcard.key \
+-out wildcard.cert \
+-subj "/CN=*.swarmapps.dev01.dockernetes.org/O=Dockernetes"
 ```
-Then create secrets from cert and key file 
+
+## Create Docker Secrets
+Then create secrets from cert and key file
+
 ```
 $ docker secret create wildcardcert ./wildcard.cert
 $ docker secret create wildcardkey ./wildcard.key
@@ -73,10 +104,10 @@ $ docker secret create wildcardkey ./wildcard.key
 
 
 
-## Deploy the hello stack 
+## Deploy the hello stack
 
 ```
-docker stack deploy -c hello-svc-compose.yaml hello
+$ docker stack deploy -c hello-svc-compose.yaml hello
 Creating network hello_app_ovl
 Creating service hello_app
 ```
@@ -90,7 +121,7 @@ kzg4plbz84ux        hello_app.1         gcr.io/google-samples/hello-app:1.0   in
 ```
 
 
-## Test the application 
+## Test the application
 ```
 curl -k  https://hello.swarmapps.dev01.dockernetes.org  --resolve hello.swarmapps.dev01.dockernetes.org:35.246.203.59
 Hello, world!
@@ -100,7 +131,9 @@ Hostname: 2f2f03ddddce
 
 35.246.203.59 refers to Public IP address of one Interlock Node
 
-When using a loadbalancer, create an A record to resolve *.swarmapps.dev01.dockernetes.org -> 35.246.203.59
+When using a loadbalancer, create an A record to resolve *.swarmapps.dev01.dockernetes.org -> <strong><em>IngressLoadBalancerIP</em></strong>
+![DNS Mapping  ](./ARecord.png)
+
 
 ```
 curl -k  https://hello.swarmapps.dev01.dockernetes.org
@@ -108,5 +141,3 @@ Hello, world!
 Version: 1.0.0
 Hostname: cb941a7e5c7d
 ```
-
-
