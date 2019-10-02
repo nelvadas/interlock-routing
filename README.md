@@ -8,7 +8,6 @@ Add a specific label to all Interlock nodes
 ```
 docker node update --label-add role=interlock-infra  interlock-node-0
 docker node update --label-add role=interlock-infra  interlock-node-1
-
 ```
 
 Apply the same role label for kubectl Commands  
@@ -39,7 +38,7 @@ Host mode is the recommended approach for high performance production applicatio
 
 
 
-### Create the interlock configuration
+## Create the interlock configuration
 ```
 $docker config create interlock.conf ./service.interlock.conf
 ```
@@ -49,6 +48,8 @@ You can inspect the created configuration with the following command
 $ docker config  inspect  interlock.conf --pretty
 ```
 
+## Create the interlock Overlay network 
+```
 $ docker network create -d overlay interlock
 ```
 
